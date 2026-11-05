@@ -12,7 +12,9 @@ A single-file, zero-dependency web page that turns the classic resistor color co
 
 ## Try it now
 
-Open `Resistor Color-Code Volume Control.html` in any modern browser — no build step, no dependencies, no server required.
+**Live page:** https://hotwings06.github.io/project-paradox/
+
+Or open `index.html` in any modern browser — no build step, no dependencies, no server required.
 
 ## Tech notes
 
