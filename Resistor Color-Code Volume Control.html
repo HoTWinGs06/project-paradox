@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Resistor Volume Control</title>
+<style>
+:root{--bg:#f1f3f8;--fg:#111;--wire:#b5b5b5;--card:#fff;--line:#222;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171c;--fg:#eee;--wire:#666;--card:#20232a;--line:#999}}
+:root[data-theme="dark"]{--bg:#15171c;--fg:#eee;--wire:#666;--card:#20232a;--line:#999}
+color-scheme:light dark;
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:Helvetica,Arial,sans-serif;display:flex;justify-content:center}
+main{width:100%;max-width:720px;padding:16px}
+svg{width:100%;height:auto;display:block}
+.sel{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin:8px 0 14px}
+.sel label{display:flex;flex-direction:column;align-items:center;font-size:14px;gap:4px}
+select{font-size:14px;padding:3px 6px;border-radius:6px}
+button{font-size:16px;padding:10px 20px;border:0;border-radius:8px;background:#222;color:#fff;cursor:pointer;display:block;margin:0 auto 14px}
+.wrap{overflow-x:auto;background:var(--card);border-radius:8px;padding:8px}
+table{border-collapse:collapse;width:100%;min-width:480px;font-size:14px;text-align:center}
+th{border:2px solid var(--line);padding:3px;font-size:12px}
+td{border:2px solid var(--line);padding:2px 4px;color:#000}
+tr.on td{outline:3px solid #e11;outline-offset:-3px;font-weight:700}
+.bar{height:30px;max-width:360px;margin:0 auto 12px;border-radius:15px;overflow:hidden;position:relative;background:#0a0b2e;box-shadow:inset 0 0 0 2px #2a2a5e}
+.bar .st{position:absolute;inset:0;background-image:radial-gradient(#fff 1px,transparent 1.6px),radial-gradient(rgba(255,255,255,.85) .8px,transparent 1.3px);background-size:44px 18px,26px 12px;background-position:6px 5px,14px 9px;animation:tw 1.2s ease-in-out infinite alternate}
+@keyframes tw{to{opacity:.3}}
+.bar i{display:block;position:relative;z-index:1;height:100%;background:linear-gradient(180deg,#f63 0 16.7%,#fc3 0 33.4%,#9f6 0 50%,#3cf 0 66.7%,#66f 0 83.4%,#c3f 0);width:0;box-shadow:0 0 8px rgba(255,170,60,.35);-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0,0,120,30'%3E%3Cpath d='M0,6C15,6,45,0,60,0C75,0,105,6,120,6L120,30C105,30,75,24,60,24C45,24,15,30,0,30Z'/%3E%3C/svg%3E");-webkit-mask-repeat:repeat-x;-webkit-mask-size:120px 30px;-webkit-mask-position:0 0;mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0,0,120,30'%3E%3Cpath d='M0,6C15,6,45,0,60,0C75,0,105,6,120,6L120,30C105,30,75,24,60,24C45,24,15,30,0,30Z'/%3E%3C/svg%3E");mask-repeat:repeat-x;mask-size:120px 30px;mask-position:0 0;animation:waveflow 1.4s linear infinite}
+@keyframes waveflow{from{-webkit-mask-position:0 0;mask-position:0 0}to{-webkit-mask-position:120px 0;mask-position:120px 0}}
+#catN{position:absolute;top:50%;left:0;width:32px;height:26px;transform:translate(-100%,-50%);pointer-events:none;z-index:2;animation:bob .45s ease-in-out infinite alternate}
+@keyframes bob{from{transform:translate(-100%,-58%)}to{transform:translate(-100%,-42%)}}
+#out{text-align:center;font-size:14px;margin-bottom:8px}
+#hint{display:none;text-align:center;font-size:13px;opacity:.85;margin:0 0 12px}
+.sel.live select{outline:3px solid #2a7;outline-offset:1px;box-shadow:0 0 10px rgba(42,170,119,.35)}
+</style></head><body><main>
+<svg viewBox="0 0 900 270" role="img" aria-label="Speaker, resistor and DAC circuit"><defs><linearGradient id="rg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f"/><stop offset=".25" stop-color="#f84"/><stop offset=".45" stop-color="#fe4"/><stop offset=".62" stop-color="#4e4"/><stop offset=".78" stop-color="#47e"/><stop offset="1" stop-color="#b4f"/></linearGradient></defs>
+ <rect x="250" y="40" width="10" height="150" fill="var(--wire)"/>
+ <rect x="250" y="40" width="110" height="10" fill="var(--wire)"/>
+ <rect x="250" y="180" width="390" height="10" fill="var(--wire)"/>
+ <rect x="470" y="40" width="170" height="10" fill="var(--wire)"/>
+ <g id="waves" fill="none" stroke="#111" stroke-width="14" stroke-linecap="round" style="stroke:var(--fg)">
+  <path d="M95 75 Q60 120 95 165" style="stroke:url(#rg)"/><path d="M125 55 Q70 120 125 185" style="stroke:url(#rg)"/><path d="M155 35 Q80 120 155 205" id="w3" style="stroke:url(#rg)"/></g>
+ <path d="M160 85h40l65-50v170l-65-50h-40z" fill="var(--fg)"/>
+ <text x="285" y="118" font-size="20" fill="var(--fg)">V<tspan font-size="14" dy="5">max</tspan><tspan dy="-5"> = </tspan><tspan id="vs">4.98</tspan>V</text>
+ <text x="285" y="142" font-size="20" fill="var(--fg)">R = 10kΩ</text>
+ <rect x="355" y="26" width="115" height="38" rx="14" fill="#e8d9bd"/>
+ <rect id="b1" x="388" y="26" width="9" height="38" fill="#fc0"/>
+ <rect id="b2" x="406" y="26" width="9" height="38" fill="#000"/>
+ <rect id="b3" x="424" y="26" width="9" height="38" fill="#000"/>
+ <rect x="446" y="26" width="9" height="38" fill="#c9a227"/>
+ <text x="500" y="26" font-size="19" fill="var(--fg)">V<tspan font-size="13" dy="4">out</tspan><tspan dy="-4"> : V</tspan><tspan font-size="13" dy="4">max</tspan><tspan dy="-4"> = 5V</tspan></text>
+ <text x="572" y="198" font-size="19" fill="var(--fg)" text-anchor="end" dx="62">Ground</text>
+ <rect x="640" y="18" width="260" height="232" fill="#000"/>
+ <text x="770" y="150" font-size="56" fill="#fff" text-anchor="middle">DAC</text>
+</svg>
+<div class="sel">
+ <label>Band One<select id="s1"></select></label>
+ <label>Band Two<select id="s2"></select></label>
+ <label>Multiplier<select id="s3"></select></label>
+</div>
+<div id="out"></div>
+<div class="bar"><span class="st"></span><i id="vb"></i><span id="catN"><svg viewBox="0 0 34 26" width="32" height="26"><rect x="5" y="4" width="20" height="14" rx="3" fill="#f3c489"/><rect x="6.5" y="5.5" width="17" height="11" rx="2" fill="#ff9ed2"/><rect x="8" y="7" width="1.6" height="1.6" fill="#e55"/><rect x="13" y="9" width="1.6" height="1.6" fill="#39d"/><rect x="18" y="7.5" width="1.6" height="1.6" fill="#fd5"/><rect x="10" y="12.5" width="1.6" height="1.6" fill="#f83"/><rect x="16.5" y="13.5" width="1.6" height="1.6" fill="#6b3"/><rect x="21" y="11" width="1.6" height="1.6" fill="#9af"/><rect x="7" y="18" width="2" height="4" rx="1" fill="#111"/><rect x="11.5" y="18" width="2" height="4" rx="1" fill="#111"/><rect x="17" y="18" width="2" height="4" rx="1" fill="#111"/><rect x="21.5" y="18" width="2" height="4" rx="1" fill="#111"/><circle cx="26" cy="11" r="5.4" fill="#b7b6c6"/><path d="M22.6 7.4l-1-3.2 2.8 1.4z" fill="#b7b6c6"/><path d="M29.4 7.4l1-3.2-2.8 1.4z" fill="#b7b6c6"/><circle cx="24.6" cy="10.6" r="1" fill="#111"/><circle cx="27.6" cy="10.6" r="1" fill="#111"/><ellipse cx="23.8" cy="13" rx="1.5" ry="1" fill="#f6a"/><ellipse cx="28.4" cy="13" rx="1.5" ry="1" fill="#f6a"/></svg></span></div>
+<div style="text-align:center"><button id="play" style="display:inline-block;margin:0 6px 14px">▶ Play my set</button><button id="rr" style="display:inline-block;margin:0 6px 14px">▶ Let me cook</button></div><div id='hint'>🔊 The bands are LIVE while it plays — twist the dials and the volume follows</div>
+<div class="wrap"><table>
+ <thead><tr><th>COLOR</th><th>1ST BAND</th><th>2ND BAND</th><th>3RD BAND</th><th>MULTIPLIER</th><th>TOLERANCE</th></tr></thead>
+ <tbody id="tb"></tbody></table></div>
+</main>
+<script>
+const C=[["Black","#000",0,"1Ω",1,""],["Brown","#8b5a5a",1,"10Ω",10,"± 1%"],["Red","#f00",2,"100Ω",100,"± 2%"],["Orange","#ff8c00",3,"1KΩ",1e3,""],["Yellow","#ff0",4,"10KΩ",1e4,""],["Green","#3c3",5,"100KΩ",1e5,"± 0.5%"],["Blue","#66f",6,"1MΩ",1e6,"± 0.25%"],["Violet","#c6f",7,"10MΩ",1e7,"± 0.10%"],["Grey","#aaa",8,"",0,"± 0.05%"],["White","#fff",9,"",0,""],["Gold","#c9a227","","0.1Ω",0.1,"± 5%"],["Silver","#ccc","","0.01Ω",0.01,"± 10%"]];
+const $=id=>document.getElementById(id);
+const sel=[$("s1"),$("s2"),$("s3")];
+C.forEach((c,i)=>{
+ if(i<10){[0,1].forEach(k=>sel[k].add(new Option(c[0],i)))}
+ if(c[4])sel[2].add(new Option(c[0],i));
+ const tr=document.createElement("tr");tr.id="r"+i;
+ const d=c[2]===""?'<td style="background:repeating-linear-gradient(135deg,#fdd 0 4px,#fff 4px 8px)"></td>':`<td>${c[2]}</td>`;
+ tr.innerHTML=`<td style="background:${c[1]};${i==0?"color:#fff":""}">${c[0]}</td>${d}${d}${d}<td style="background:${c[1]};${i==0?"color:#fff":""}">${c[3]}</td><td style="background:${c[1]}">${c[5]}</td>`;
+ if(i>=8&&i<10){tr.children[4].style.background="repeating-linear-gradient(135deg,#fdd 0 4px,#fff 4px 8px)";tr.children[4].textContent=""}
+ $("tb").appendChild(tr);
+});
+sel[0].value=4;sel[1].value=0;sel[2].value=0;
+let ctx,gain,timer,on=false,vol=1;
+function fmt(r){return r>=1e6?(r/1e6)+"MΩ":r>=1e3?(r/1e3)+"kΩ":(+r.toFixed(2))+"Ω"}
+function update(q){
+ const [a,b,m]=sel.map(s=>+s.value);
+ const R=(a*10+b)*C[m][4];
+ vol=1e4/(1e4+R);
+ const v=5*vol;
+ $("b1").setAttribute("fill",C[a][1]);$("b2").setAttribute("fill",C[b][1]);$("b3").setAttribute("fill",C[m][1]);
+ $("vs").textContent=v.toFixed(2);
+ $("vb").style.width=(vol*100)+"%";$("catN").style.left=(vol*100)+"%";
+ $("out").textContent=`Resistor: ${fmt(R)} ±5%  →  speaker gets ${v.toFixed(2)}V  →  volume ${Math.round(vol*100)}%`;
+ [...$("tb").children].forEach((tr,i)=>tr.classList.toggle("on",i==a||i==b||i==m));
+ const w=$("waves");w.style.opacity=Math.max(.08,vol);
+ $("w3").style.opacity=vol>.66?1:0;w.children[1].style.opacity=vol>.33?1:0;
+ if(!q&&gain&&on){const now=ctx.currentTime;if(mode==1&&relT>now){gain.gain.setTargetAtTime(vol*.4,now,.02);gain.gain.setTargetAtTime(0,relT,.02)}}
+}
+sel.forEach(s=>s.onchange=()=>update());
+const fd=d=>261.63*Math.pow(2,d/12);
+let bak=null,mode=0,ta=0,ws=0,relT=0;
+const hush=()=>{clearTimeout(timer);if(gain&&ctx){gain.gain.cancelScheduledValues(ctx.currentTime);gain.gain.setTargetAtTime(0,ctx.currentTime,.01)}on=false;mode=0;$("play").textContent="▶ Play my set";$("rr").textContent="▶ Let me cook";if(bak){[0,1,2].forEach(k=>sel[k].value=bak[k]);bak=null;update()};$("hint").style.display="none";document.querySelector(".sel").classList.remove("live")}
+const prep=()=>{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();if(ctx.state=="suspended")ctx.resume();if(!gain){gain=ctx.createGain();gain.gain.value=0;gain.connect(ctx.destination);}};
+const spin=A=>{prep();const o=ctx.createOscillator();o.type="triangle";o.connect(gain);o.start();window._o&&window._o.stop();window._o=o;let i=0;const pulse=(f,r)=>{const t=ctx.currentTime;relT=t+r*130-60;o.frequency.setValueAtTime(f,t);gain.gain.setTargetAtTime(mode==2?(f?0.32:0):f?vol*.4:0,t,.01);gain.gain.setTargetAtTime(0,t+r*130-60,.02);if(mode==2){ta+=r;if(ta>=8){ta=0;ws++;sel[1].value=ws%10;sel[0].value=(ws/3|0)%10;sel[2].value=[0,1,2,3,4,5,6,7,8,9,10,11][(ws>>2)%12];update(1)}}timer=setTimeout(()=>pulse(...A[i++%A.length]),r*130)};pulse(...A[0]);update()};
+$("rr").onclick=()=>{
+ if(mode==2){hush();return}
+ hush();
+ try{
+   bak=[0,1,2].map(k=>sel[k].value);ta=0;ws=0;on=true;mode=2;$("rr").textContent="■ Stop";
+  const n=[[277,6],[311,10],[311,6],[349,6],[831,1],[740,1],[698,1],[622,1],[554,6],[622,10],[0,4],[415,2],[415,10],[466,1],[466,1],[415,1],[415,1],[698,3],[698,3],[622,6],[466,1],[466,1],[415,1],[415,1],[622,3],[622,3],[554,3],[523,1],[466,2],[554,1],[554,1],[554,1],[554,1],[554,3],[622,3],[523,3],[466,1],[415,2],[415,2],[415,2],[622,4],[554,8],[466,1],[466,1],[415,1],[415,1],[698,3],[698,3],[622,6],[466,1],[466,1],[415,1],[415,1],[831,3],[523,3],[554,3],[523,1],[466,2],[554,1],[554,1],[554,1],[554,1],[554,3],[622,3],[523,3],[466,1],[415,2],[0,2],[415,4],[622,8],[554,4],[0,4]];let i=0;
+   spin(n);update();
+ }catch(e){$("out").textContent="Audio isn’t available in this browser."}
+};
+$("play").onclick=()=>{
+ if(mode==1){hush();return}
+ hush();
+ try{
+   const A=[[fd(+sel[0].value),5],[0,1],[fd(+sel[1].value),5],[0,1],[fd(+sel[2].value),7],[0,2]];
+   on=true;mode=1;$("play").textContent="■ Stop";spin(A);update();$("hint").style.display="block";document.querySelector(".sel").classList.add("live");
+ }catch(e){$("out").textContent="Audio isn’t available in this browser."}
+};
+update();
+</script></body></html>
